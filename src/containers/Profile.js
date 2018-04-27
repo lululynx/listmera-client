@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import config from '../config';
 import '../App.css';
 
 import { connect } from 'react-redux';
@@ -17,9 +18,9 @@ class Profile extends Component {
     } else {
       const headers = new Headers({
         User: user.username,
-        Origin: 'http://listmera.rocks',
+        Origin: config.baseClientUrl,
       })
-      fetch('https://listmera.herokuapp.com/api/me', {
+      fetch(`${config.baseServerUrl}/api/me`, {
         method: 'GET',
         headers: headers
       }).then(res => res.json())

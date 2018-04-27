@@ -1,13 +1,12 @@
 import React, { Component } from 'react';
-// import ReactDom from 'react-dom';
-
+import config from '../config';
 import Header from '../components/Header';
 import '../App.css';
 
 class Access extends Component {
 
   redirect() {
-    window.location.href = 'https://listmera.herokuapp.com/api/access';
+    window.location.href = `${config.baseServerUrl}/api/access`;
   }
 
   //============ RENDERING

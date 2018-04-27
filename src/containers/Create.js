@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import '../App.css';
-
+import config from '../config';
 import { connect } from 'react-redux';
 import { set } from '../actions'
 
@@ -21,14 +21,14 @@ class Create extends Component {
   }
 
   createPlaylist(listName, selectedValues, selectedTempo) {
-    fetch('https://listmera.herokuapp.com/api/playlist', {
+    fetch(`${config.baseServerUrl}/api/playlist`, {
       method: 'POST',
       body: JSON.stringify({username: this.props.user.username, name: listName, values: selectedValues, tempo: selectedTempo}),
       mode: 'cors',
       header: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'Origin': 'http://listmera.rocks',
+        'Origin': config.baseClientUrl
       },
     }).then(res => res.json())
       .then(res => {
@@ -73,20 +73,20 @@ class Create extends Component {
         <div className="MaxWidthCreate">
           <h1>Create a new playlist</h1>
           <div className="UserForm">
-            <input 
-              type="text" 
+            <input
+              type="text"
               ref={el => this.inputName = el || 'Listmera List'}
               placeholder="PLAYLIST NAME"
               />
             <h2>Strict Mode</h2>
             <div className="SelectorWrap">
-              <button 
+              <button
                 className={this.toggleClass('Strict')}
                 onClick={() => this.toggleSelection('Strict')}>Strict</button>
             </div>
             <h2>Type</h2>
             <div className="SelectorWrap">
-              <button 
+              <button
                 className={this.toggleClass('Dance')}
                 onClick={() => this.toggleSelection('Dance')}>Danceable</button>
               <button

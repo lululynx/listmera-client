@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import config from '../config';
 import '../App.css';
 
 import { connect } from 'react-redux';
@@ -11,8 +12,8 @@ import Track from '../components/Track';
 class Playlist extends Component {
   constructor(props) {
     super(props);
-    fetch(`https://listmera.herokuapp.com/api${window.location.pathname}`, {
-      'Origin': 'http://listmera.rocks',
+    fetch(`${config.baseServerUrl}/api${window.location.pathname}`, {
+      'Origin': config.baseClientUrl,
     })
       .then(res => {
         if (res.status === 404) return false;
@@ -39,14 +40,14 @@ class Playlist extends Component {
   }
 
   collaborate () {
-    fetch(`https://listmera.herokuapp.com/api${window.location.pathname}`, {
+    fetch(`${config.baseServerUrl}/api${window.location.pathname}`, {
       method: 'PUT',
       body: window.localStorage.getItem('user'),
       mode: 'cors',
       header: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'Origin': 'http://listmera.rocks',
+        'Origin': config.baseClientUrl,
       },
     }).then(res => {
       if (res.status === 200) window.location.reload();
@@ -59,14 +60,14 @@ class Playlist extends Component {
       ...this.state,
       loading: true,
     });
-    fetch(`https://listmera.herokuapp.com/api${window.location.pathname}`, {
+    fetch(`${config.baseServerUrl}/api${window.location.pathname}`, {
       method: 'POST',
       body: window.localStorage.getItem('user'),
       mode: 'cors',
       header: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'Origin': 'http://listmera.rocks',
+        'Origin': config.baseClientUrl,
       },
     }).then(res => window.location = '/generated')
       .catch(e => console.error(e));
@@ -81,14 +82,14 @@ class Playlist extends Component {
       ...JSON.parse(window.localStorage.getItem('user')),
       copy: true,
     }
-    fetch(`https://listmera.herokuapp.com/api${window.location.pathname}`, {
+    fetch(`${config.baseServerUrl}/api${window.location.pathname}`, {
       method: 'POST',
       body: JSON.stringify(body),
       mode: 'cors',
       header: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'Origin': 'http://listmera.rocks',
+        'Origin': config.baseClientUrl,
       },
     }).then(res => window.location = '/generated')
       .catch(e => console.error(e));
@@ -99,14 +100,14 @@ class Playlist extends Component {
     const sure = window.confirm(`Hey ${user.name.split(' ')[0]}, are you sure you want to delete this playlist?`);
     if (sure) {
       const body = {username: user.username};
-      fetch(`https://listmera.herokuapp.com/api${window.location.pathname}`, {
+      fetch(`${config.baseServerUrl}/api${window.location.pathname}`, {
         method: 'DELETE',
         body: JSON.stringify(body),
         mode: 'cors',
         header: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
-          'Origin': 'http://listmera.rocks',
+          'Origin': config.baseClientUrl,
         },
       }).then(res => {
         const track = window.location.pathname.split('/')[2];
@@ -127,7 +128,7 @@ class Playlist extends Component {
 
   renderTracks(tracks) {
     return tracks.map((el, i) => {
-      return <Track key={i} 
+      return <Track key={i}
         img={el.image}
         title={el.name}
         artists={el.artists}
@@ -141,7 +142,7 @@ class Playlist extends Component {
     if (JSON.parse(window.localStorage.getItem('user')) === null) {
       buttonClass = 'Collabed';
     } else {
-      buttonClass = state.collabers.indexOf(JSON.parse(window.localStorage.getItem('user')).name) >= 0 
+      buttonClass = state.collabers.indexOf(JSON.parse(window.localStorage.getItem('user')).name) >= 0
         ? 'Collabed'
         : '';
     }

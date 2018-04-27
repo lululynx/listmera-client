@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import config from '../config';
 import '../App.css';
 
 import Header from '../components/Header';
@@ -9,9 +10,9 @@ import TopLists from '../components/TopLists';
 class Main extends Component {
   constructor(props) {
     super(props);
-    fetch('https://listmera.herokuapp.com/api/playlists/recent', {
+    fetch(`${config.baseServerUrl}/api/playlists/recent`, {
       header: {
-        'Origin': 'http://listmera.rocks',
+        'Origin': config.baseClientUrl,
       }
     })
       .then(res => res.json())
