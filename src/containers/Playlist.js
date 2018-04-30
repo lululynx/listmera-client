@@ -10,42 +10,45 @@ import Loader from '../components/Loader';
 import Track from '../components/Track';
 
 class Playlist extends Component {
-  constructor(props) {
-    super(props);
-    fetch(`${config.baseServerUrl}/api${window.location.pathname}`, {
-      'Origin': config.baseClientUrl,
-    })
-      .then(res => {
-        if (res.status === 404) return false;
-        return res.json()
-      })
-      .then(res => {
-        if (!res) this.setState({deleted: true});
-        if (window.localStorage.getItem('user') && JSON.parse(window.localStorage.getItem('user')).username === res.adminId) {
-          this.setState({
-            ...res,
-            isAdmin: true,
-            loaded: true,
-          });
-        } else {
-          this.setState({
-            ...res,
-            loaded: true,
-          });
-        }
-      })
-      .catch(e => {
-        console.error(e);
-      });
-  }
-  // componentDidMount() {
-  //   console.log('window', window.location.pathname);
-  //   this.props.getPlaylist(window.location.pathname)
-  //   // this.setState({
-    //   isAdmin: true,
-    //   loaded: true
-    // })
+  // constructor(props) {
+  //   super(props);
+    // this.state = {
+    //   user: JSON.parse(window.localStorage.getItem('user')).username
+    // }
+
+
+
+  //   fetch(`${config.baseServerUrl}/api${window.location.pathname}`, {
+  //     'Origin': config.baseClientUrl,
+  //   })
+  //     .then(res => {
+  //       if (res.status === 404) return false;
+  //       return res.json()
+  //     })
+  //     .then(res => {
+  //       if (!res) this.setState({deleted: true});
+  //       if (window.localStorage.getItem('user') && JSON.parse(window.localStorage.getItem('user')).username === res.adminId) {
+  //         this.setState({
+  //           ...res,
+  //           isAdmin: true,
+  //           loaded: true,
+  //         });
+  //       } else {
+  //         this.setState({
+  //           ...res,
+  //           loaded: true,
+  //         });
+  //       }
+  //     })
+  //     .catch(e => {
+  //       console.error(e);
+  //     });
+  //     console.log('user', user);
   // }
+  componentDidMount() {
+    const user = JSON.parse(window.localStorage.getItem('user')).username
+    this.props.getPlaylist(window.location.pathname, user)
+  }
 
   collaborate () {
     fetch(`${config.baseServerUrl}/api${window.location.pathname}`, {
@@ -146,11 +149,12 @@ class Playlist extends Component {
   }
 
   renderButtons = (state) => {
+    console.log('===========', state);
     let buttonClass;
     if (JSON.parse(window.localStorage.getItem('user')) === null) {
       buttonClass = 'Collabed';
     } else {
-      buttonClass = state.collabers.indexOf(JSON.parse(window.localStorage.getItem('user')).name) >= 0
+      buttonClass = state.selectedPlaylist.collabers.indexOf(JSON.parse(window.localStorage.getItem('user')).name) >= 0
         ? 'Collabed'
         : '';
     }
@@ -179,7 +183,6 @@ class Playlist extends Component {
   }
 
   renderContent = (state) => {
-    console.log('this state', state);
     if (state) {
       if (state.deleted) {
         return (
@@ -225,20 +228,32 @@ class Playlist extends Component {
   }
 
   render() {
-    console.log('STAAAAATE', window.localStorage);
-    const content = this.renderContent(this.state);
-    return (
-      <div className="Wrapper">
-        <Header />
-        {content}
-      </div>
-    );
+    if (this.props.user.selectedPlaylist.loaded) {
+      const content = this.renderContent(this.props.user);
+      return (
+        <div className="Wrapper">
+          <Header />
+          {content}
+        </div>
+      );
+    } else {
+      return (
+        <div className="Wrapper">
+          <Header />
+          <Loader />
+        </div>
+      );
+    }
   }
 }
 
-const mapDispatchToProps = (dispatch) => ({
-  unset: (playlist) => dispatch(unset(playlist)),
-  getPlaylist: (id) => dispatch(getPlaylist(id))
+const mapStateToProps = (state) => ({
+  user: state,
 })
 
-export default connect(null, mapDispatchToProps)(Playlist);
+const mapDispatchToProps = (dispatch) => ({
+  unset: (playlist) => dispatch(unset(playlist)),
+  getPlaylist: (id, user) => dispatch(getPlaylist(id, user))
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(Playlist);

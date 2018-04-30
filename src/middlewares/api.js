@@ -4,7 +4,7 @@ export const API = Symbol('API');
 export const api = store => next => action => {
   if (action[API]) {
     const { url, method, body, mode, headers } = action[API];
-
+    console.log('==========', action.user);
     fetch(config.baseServerUrl + url, {
       method: method || 'GET',
       body: JSON.stringify(body),
@@ -14,7 +14,8 @@ export const api = store => next => action => {
     .then(response => response.json())
     .then(data => store.dispatch({
       type: action.type + '_SUCCESS',
-      data
+      data,
+      user: action.user
     }))
     .catch(error => {
       store.dispatch({

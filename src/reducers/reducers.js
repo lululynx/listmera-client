@@ -6,7 +6,8 @@ const user = {
   fetching: false,
   error: null,
   isAdmin: false,
-  loaded: false
+  loaded: false,
+  selectedPlaylist: {}
 }
 
 const reducer = (state = user, action) => {
@@ -76,8 +77,6 @@ const reducer = (state = user, action) => {
   }
 
   case 'GET_RECENT_SUCCESS':
-  console.log('state', state);
-  console.log('action', action.data.playlists);
   return {
     ...state,
     fetching: false,
@@ -98,15 +97,33 @@ const reducer = (state = user, action) => {
   }
 
   case 'GET_PLAYLIST_SUCCESS':
-  console.log('hey', state);
+  console.log('hey', action.user);
+  console.log('action', action.data.admin);
   return {
     ...state,
     fetching: false,
-    playlists: [state.playlists.filter((p) => {
-    if (p === action.data.id) return p
-    })
-    ],
-    isAdmin: true,
+    selectedPlaylist: action.data,
+    isAdmin: action.data.admin === action.user,
+    loaded: true
+  }
+
+  case 'COLLABORATE_REQUEST':
+  return {
+    ...state,
+    fetching: true
+  }
+
+  case 'COLLABORATE_FAILURE':
+  return {
+    ...state,
+    fetching: false,
+    error: action.payload
+  }
+
+  case 'COLLABORATE_SUCCESS':
+  return {
+    ...state,
+    fetching: false,
     loaded: true
   }
 

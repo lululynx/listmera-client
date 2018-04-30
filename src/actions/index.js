@@ -47,12 +47,28 @@ export const getRecent = () => ({
   }
 })
 
-export const getPlaylist = (url) => ({
+export const getPlaylist = (url, user) => ({
   type: 'GET_PLAYLIST',
+  user,
   [API]: {
     url: '/api' + url,
     header: {
       'Origin': config.baseClientUrl
     }
+  }
+})
+
+export const collaborate = (url) => ({
+  type: 'COLLABORATE',
+  [API]: {
+    url: '/api' + url,
+    method: 'PUT',
+    body: user,
+    mode: 'cors',
+    header: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'Origin': config.baseClientUrl,
+    },
   }
 })
