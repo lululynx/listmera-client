@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import '../App.css';
-import config from '../config';
 import { connect } from 'react-redux';
-import { set } from '../actions'
+import { set, createPlaylist } from '../actions'
 
 import Header from '../components/Header';
 
@@ -13,30 +12,24 @@ class Create extends Component {
     if (!user) {
       window.location = '/access';
     }
+
+    this.state = {
+      selected: [],
+      class: 'Selected',
+      lengthPlaylistIds: props.user.playlists.length,
+      flag: false
+    }
   }
 
-  state = {
-    selected: [],
-    class: 'Selected',
-  }
-
-  createPlaylist(listName, selectedValues, selectedTempo) {
-    fetch(`${config.baseServerUrl}/api/playlist`, {
-      method: 'POST',
-      body: JSON.stringify({username: this.props.user.username, name: listName, values: selectedValues, tempo: selectedTempo}),
-      mode: 'cors',
-      header: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Origin': config.baseClientUrl
-      },
-    }).then(res => res.json())
-      .then(res => {
-        this.props.set(res)
-        window.localStorage.setItem('user', JSON.stringify(this.props.user));
-        window.location = `/playlist/${res.id}`
-      })
-      .catch(e => console.error(e));
+  static getDerivedStateFromProps (nextProps, prevState) {
+    if (nextProps.user && prevState.lengthPlaylistIds !== nextProps.user.playlists.length) {
+      window.localStorage.setItem('user', JSON.stringify(nextProps.user));
+      window.location = `/playlist/${nextProps.user.playlists[nextProps.user.playlists.length - 1]}`;
+    }
+    return {
+      ...prevState,
+      flag: nextProps.user && prevState.lengthPlaylistIds !== nextProps.user.playlists.length
+    }
   }
 
   toggleSelection = (ref) => {
@@ -67,8 +60,9 @@ class Create extends Component {
   }
 
   render() {
+    console.log(this.state, '===========================SCREWIT=====')
     return (
-      <div className="Wrapper">
+      <div className="Wrapper"> {this.state.flag ? 'true' : 'false'}
         <Header />
         <div className="MaxWidthCreate">
           <h1>Create a new playlist</h1>
@@ -131,12 +125,15 @@ class Create extends Component {
             </div>
           </div>
           <button className="Create"
-            onClick={() => this.createPlaylist(this.inputName.value, this.state.selected, this.tempo.value)}>CREATE</button>
+          onClick ={() => {
+            this.props.createPlaylist(this.props.user.username, this.inputName.value, this.state.selected, this.tempo.value)}
+          }> CREATE </button>
         </div>
       </div>
     );
   }
 }
+
 
 const mapStateToProps = (state) => ({
   user: state,
@@ -144,6 +141,7 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch) => ({
   set: (playlist) => dispatch(set(playlist)),
+  createPlaylist: (userName, listName, selectedValues, selectedTempo) => dispatch(createPlaylist(userName, listName, selectedValues, selectedTempo))
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Create);

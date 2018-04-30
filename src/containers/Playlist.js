@@ -3,7 +3,7 @@ import config from '../config';
 import '../App.css';
 
 import { connect } from 'react-redux';
-import { unset } from '../actions'
+import { unset, getPlaylist } from '../actions'
 
 import Header from '../components/Header';
 import Loader from '../components/Loader';
@@ -38,6 +38,14 @@ class Playlist extends Component {
         console.error(e);
       });
   }
+  // componentDidMount() {
+  //   console.log('window', window.location.pathname);
+  //   this.props.getPlaylist(window.location.pathname)
+  //   // this.setState({
+    //   isAdmin: true,
+    //   loaded: true
+    // })
+  // }
 
   collaborate () {
     fetch(`${config.baseServerUrl}/api${window.location.pathname}`, {
@@ -171,6 +179,7 @@ class Playlist extends Component {
   }
 
   renderContent = (state) => {
+    console.log('this state', state);
     if (state) {
       if (state.deleted) {
         return (
@@ -216,6 +225,7 @@ class Playlist extends Component {
   }
 
   render() {
+    console.log('STAAAAATE', window.localStorage);
     const content = this.renderContent(this.state);
     return (
       <div className="Wrapper">
@@ -228,6 +238,7 @@ class Playlist extends Component {
 
 const mapDispatchToProps = (dispatch) => ({
   unset: (playlist) => dispatch(unset(playlist)),
+  getPlaylist: (id) => dispatch(getPlaylist(id))
 })
 
 export default connect(null, mapDispatchToProps)(Playlist);

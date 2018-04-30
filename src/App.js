@@ -26,7 +26,7 @@ class App extends Component {
       this.props.login(user);
     }
   }
-  
+
   render() {
     return (
       <Router>

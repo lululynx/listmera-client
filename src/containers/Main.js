@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import config from '../config';
+import { connect } from 'react-redux';
+
 import '../App.css';
 
 import Header from '../components/Header';
@@ -7,35 +8,27 @@ import Loader from '../components/Loader';
 import Banner from '../components/Banner';
 import TopLists from '../components/TopLists';
 
+import { getRecent } from '../actions'
+
 class Main extends Component {
-  constructor(props) {
-    super(props);
-    fetch(`${config.baseServerUrl}/api/playlists/recent`, {
-      header: {
-        'Origin': config.baseClientUrl,
-      }
-    })
-      .then(res => res.json())
-      .then(res => {
-        this.setState({
-          ...res,
-        })
-      })
-      .catch(e => console.error(e));
-  }
 
   //========================================= RENDERING
 
-  renderTopLists(state) {
-    if (state) {
-      return <TopLists content={this.state.playlists} title="Recently Created Playlists" />
+  componentDidMount() {
+    this.props.getRecent()
+  }
+
+  renderTopLists(user) {
+    console.log('userplay', user.playlists);
+    if (user) {
+      return <TopLists content={user.playlists} title="Recently Created Playlists" />
     } else {
       return <Loader />
     }
   }
 
   render() {
-    const lists = this.renderTopLists(this.state);
+    const lists = this.renderTopLists(this.props.user);
     return (
       <div className="Wrapper">
         <Header />
@@ -46,4 +39,12 @@ class Main extends Component {
   }
 }
 
-export default Main;
+const mapStateToProps = (state) => ({
+  user: state,
+})
+
+const mapDispatchToProps = (dispatch) => ({
+  getRecent: () => dispatch(getRecent())
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(Main);

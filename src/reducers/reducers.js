@@ -2,11 +2,16 @@ const user = {
   username: '',
   name: '',
   picture: '',
-  playlists: []
+  playlists: [],
+  fetching: false,
+  error: null,
+  isAdmin: false,
+  loaded: false
 }
 
 const reducer = (state = user, action) => {
   switch (action.type) {
+
   case 'LOGIN':
     return {
       ...state,
@@ -33,6 +38,78 @@ const reducer = (state = user, action) => {
       ...state,
       playlists: play,
     }
+
+  case 'CREATE_PLAYLIST_REQUEST':
+  return {
+    ...state,
+    fetching: true,
+  }
+
+  case 'CREATE_PLAYLIST_FAILURE':
+  return {
+    ...state,
+    fetching: false,
+    error: action.payload
+  }
+
+  case 'CREATE_PLAYLIST_SUCCESS':
+  return {
+    ...state,
+    fetching: false,
+    playlists: [
+      ...state.playlists,
+      action.data.id,
+    ]
+  }
+
+  case 'GET_RECENT_REQUEST':
+  return {
+    ...state,
+    fetching: true
+  }
+
+  case 'GET_RECENT_FAILURE':
+  return {
+    ...state,
+    fetching: false,
+    error: action.payload
+  }
+
+  case 'GET_RECENT_SUCCESS':
+  console.log('state', state);
+  console.log('action', action.data.playlists);
+  return {
+    ...state,
+    fetching: false,
+    playlists: action.data.playlists
+  }
+
+  case 'GET_PLAYLIST_REQUEST':
+  return {
+    ...state,
+    fetching: true
+  }
+
+  case 'GET_PLAYLIST_FAILURE':
+  return {
+    ...state,
+    fetching: false,
+    error: action.payload
+  }
+
+  case 'GET_PLAYLIST_SUCCESS':
+  console.log('hey', state);
+  return {
+    ...state,
+    fetching: false,
+    playlists: [state.playlists.filter((p) => {
+    if (p === action.data.id) return p
+    })
+    ],
+    isAdmin: true,
+    loaded: true
+  }
+
   default: return state;
   }
 }
