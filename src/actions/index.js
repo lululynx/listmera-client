@@ -58,41 +58,36 @@ export const getPlaylist = (url, user) => ({
   }
 })
 
-export const collaborate = (url, user) => {
-  console.log('Useruser', user);
-  return ({
-    type: 'COLLABORATE',
-    [API]: {
-      url: '/api/playlist/' + url,
-      method: 'PUT',
-      body: user,
-      mode: 'cors',
-      header: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Origin': config.baseClientUrl,
-      },
-    }
-  })
-}
+export const collaborate = (url, user) => ({
+  type: 'COLLABORATE',
+  [API]: {
+    url: '/api/playlist/' + url,
+    method: 'PUT',
+    body: user,
+    mode: 'cors',
+    header: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'Origin': config.baseClientUrl,
+    },
+  }
+})
 
-export const deletePlaylist = (url, user) => {
-  console.log('USER TO BE DELETEDDDDDD', user)
-  return ({
-    type: 'DELETE_PLAYLIST',
-    [API]: {
-      url: '/api/playlist/' + url,
-      method: 'DELETE',
-      body: user,
-      mode: 'cors',
-      header: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Origin': config.baseClientUrl,
-      },
-    }
-  })
-}
+export const deletePlaylist = (url, user) => ({
+  type: 'DELETE_PLAYLIST',
+  user,
+  [API]: {
+    url: '/api/playlist/' + url,
+    method: 'DELETE',
+    body: user,
+    mode: 'cors',
+    header: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'Origin': config.baseClientUrl,
+    },
+  }
+})
 
 export const getProfile = (user) => ({
   type: 'GET_PROFILE',

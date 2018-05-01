@@ -96,8 +96,6 @@ const reducer = (state = user, action) => {
   }
 
   case 'GET_PLAYLIST_SUCCESS':
-  console.log('hey', action.user);
-  console.log('action', action.data.admin);
   return {
     ...state,
     fetching: false,
@@ -143,7 +141,7 @@ const reducer = (state = user, action) => {
     ...state,
     user: {
       ...state.user,
-      playlists: state.user.playlists.filter(item => item !== action.payload)
+      playlists: state.playlists.filter(item => item !== action.payload)
     },
     fetching: false,
   }
@@ -161,7 +159,7 @@ const reducer = (state = user, action) => {
     loaded: false
   }
 
-  case 'GET_PROFILE_REQUEST':
+  case 'GET_PROFILE_SUCCESS':
   return {
     ...state,
     fetching: false,

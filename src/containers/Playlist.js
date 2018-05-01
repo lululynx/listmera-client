@@ -3,7 +3,7 @@ import config from '../config';
 import '../App.css';
 
 import { connect } from 'react-redux';
-import { unset, getPlaylist, collaborate, deletePlaylist } from '../actions'
+import { unset, getPlaylist, collaborate, deletePlaylist, getRecent } from '../actions'
 
 import Header from '../components/Header';
 import Loader from '../components/Loader';
@@ -122,34 +122,34 @@ class Playlist extends Component {
       .catch(e => console.error(e));
   }
 
-  delete = () => {
-    let user = JSON.parse(window.localStorage.getItem('user'));
-    const sure = window.confirm(`Hey ${user.name.split(' ')[0]}, are you sure you want to delete this playlist?`);
-    if (sure) {
-      const body = {username: user.username};
-      fetch(`${config.baseServerUrl}/api${window.location.pathname}`, {
-        method: 'DELETE',
-        body: JSON.stringify(body),
-        mode: 'cors',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Origin': config.baseClientUrl,
-        },
-      }).then(res => {
-        const track = window.location.pathname.split('/')[2];
-        const newPlaylists = user.playlists.filter(el => el !== track)
-        user = {
-          ...user,
-          playlists: newPlaylists,
-        }
-        window.localStorage.setItem('user', JSON.stringify(user));
-        this.props.unset(track)
-        window.location = '/';
-      })
-        .catch(e => console.error(e));
-    }
-  }
+  // delete = () => {
+  //   let user = JSON.parse(window.localStorage.getItem('user'));
+  //   const sure = window.confirm(`Hey ${user.name.split(' ')[0]}, are you sure you want to delete this playlist?`);
+  //   if (sure) {
+  //     const body = {username: user.username};
+  //     fetch(`${config.baseServerUrl}/api${window.location.pathname}`, {
+  //       method: 'DELETE',
+  //       body: JSON.stringify(body),
+  //       mode: 'cors',
+  //       headers: {
+  //         'Accept': 'application/json',
+  //         'Content-Type': 'application/json',
+  //         'Origin': config.baseClientUrl,
+  //       },
+  //     }).then(res => {
+  //       const track = window.location.pathname.split('/')[2];
+  //       const newPlaylists = user.playlists.filter(el => el !== track)
+  //       user = {
+  //         ...user,
+  //         playlists: newPlaylists,
+  //       }
+  //       window.localStorage.setItem('user', JSON.stringify(user));
+  //       this.props.unset(track)
+  //       window.location = '/';
+  //     })
+  //       .catch(e => console.error(e));
+  //   }
+  // }
 
   handleDelete = (id, user) => {
     console.log(user, 'AAAAAAAHHHHHHH')
@@ -212,6 +212,8 @@ class Playlist extends Component {
   }
 
   renderContent = (state) => {
+    console.log('another', state);
+    
     const targetPlaylist = state.playlists.filter(p => {
       if (p.id === this.state.playlistId) return p
     })
@@ -225,12 +227,10 @@ class Playlist extends Component {
           </div>
         )
       } else {
-        console.log("state", state);
         const buttons = this.renderButtons(state);
         const tracks = this.renderTracks(targetPlaylist[0].tracks);
         const name = state.name;
         const admin = targetPlaylist[0].admin ? targetPlaylist[0].admin.split(' ')[0] : 'N/A';
-        console.log(admin, 'ADMIIIIIIIN')
         const collabers = (targetPlaylist[0].collabers.filter(el => el !== admin).length > 0)
         ? ` with the help of ${targetPlaylist[0].collabers
           .map(el => el !== null ? el.split(' ')[0] : null)
@@ -289,7 +289,8 @@ const mapDispatchToProps = (dispatch) => ({
   unset: (playlist) => dispatch(unset(playlist)),
   getPlaylist: (id, user) => dispatch(getPlaylist(id, user)),
   collaborate: (id, user) => dispatch(collaborate(id, user)),
-  deletePlaylist: (id, user) => dispatch(deletePlaylist(id, user))
+  deletePlaylist: (id, user) => dispatch(deletePlaylist(id, user)),
+  getRecent: () => dispatch(getRecent())
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Playlist);

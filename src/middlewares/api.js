@@ -13,12 +13,12 @@ export const api = store => next => action => {
     .then(response => {
       const contentType = response.headers.get('Content-Type')
       if (contentType && contentType.indexOf('application/json') !== -1) {
-        console.log('I TRY', response)
         return response.json()
-      }})
-
+      } else {
+        return null;
+      }
+    })
     .then(data => {
-      console.log(',,,,,,,,,,,,,,,,,', action);
       store.dispatch({
       type: action.type + '_SUCCESS',
       data,
