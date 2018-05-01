@@ -3,18 +3,28 @@ import config from '../config';
 import '../App.css';
 
 import { connect } from 'react-redux';
-import { unset, getPlaylist } from '../actions'
+import { unset, getPlaylist, collaborate, deletePlaylist } from '../actions'
 
 import Header from '../components/Header';
 import Loader from '../components/Loader';
 import Track from '../components/Track';
 
 class Playlist extends Component {
-  // constructor(props) {
-  //   super(props);
-    // this.state = {
-    //   user: JSON.parse(window.localStorage.getItem('user')).username
-    // }
+  constructor(props) {
+    super(props);
+    props.getPlaylist(window.location.pathname, props.user.username);
+
+    this.state = {
+      playlistId: window.location.pathname.split('/')[2],
+      user: JSON.parse(window.localStorage.getItem('user')).username || props.user.username,
+      // targetPlaylist: props.playlists.filter(p => {
+      //   if (p.id === this.playlistId) return p
+      // })
+
+    }
+  }
+
+
 
 
 
@@ -43,28 +53,34 @@ class Playlist extends Component {
   //     .catch(e => {
   //       console.error(e);
   //     });
-  //     console.log('user', user);
   // }
-  componentDidMount() {
-    const user = JSON.parse(window.localStorage.getItem('user')).username
-    this.props.getPlaylist(window.location.pathname, user)
-  }
 
-  collaborate () {
-    fetch(`${config.baseServerUrl}/api${window.location.pathname}`, {
-      method: 'PUT',
-      body: window.localStorage.getItem('user'),
-      mode: 'cors',
-      header: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Origin': config.baseClientUrl,
-      },
-    }).then(res => {
-      if (res.status === 200) window.location.reload();
-    })
-      .catch(e => console.error(e));
-  }
+
+  // componentDidMount() {
+  //
+  //
+  //
+  // static getDerivedStateFromProps (nextProps, prevState) {
+  //   return {
+  //     ...nextProps,
+  //   }
+  // }
+
+  // collaborate () {
+  //   // fetch(`${config.baseServerUrl}/api${window.location.pathname}`, {
+  //   //   method: 'PUT',
+  //   //   body: window.localStorage.getItem('user'),
+  //   //   mode: 'cors',
+  //   //   header: {
+  //   //     'Accept': 'application/json',
+  //   //     'Content-Type': 'application/json',
+  //   //     'Origin': config.baseClientUrl,
+  //   //   },
+  //   // }).then(res => {
+  //   //   if (res.status === 200) window.location.reload();
+  //   // })
+  //   //   .catch(e => console.error(e));
+  // }
 
   generate = () => {
     this.setState({
@@ -75,7 +91,7 @@ class Playlist extends Component {
       method: 'POST',
       body: window.localStorage.getItem('user'),
       mode: 'cors',
-      header: {
+      headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
         'Origin': config.baseClientUrl,
@@ -97,7 +113,7 @@ class Playlist extends Component {
       method: 'POST',
       body: JSON.stringify(body),
       mode: 'cors',
-      header: {
+      headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
         'Origin': config.baseClientUrl,
@@ -115,7 +131,7 @@ class Playlist extends Component {
         method: 'DELETE',
         body: JSON.stringify(body),
         mode: 'cors',
-        header: {
+        headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
           'Origin': config.baseClientUrl,
@@ -135,9 +151,18 @@ class Playlist extends Component {
     }
   }
 
+  handleDelete = (id, user) => {
+    console.log(user, 'AAAAAAAHHHHHHH')
+    const sure = window.confirm(`Hey ${user.name.split(' ')[0]}, are you sure you want to delete this playlist?`);
+    if (sure) {
+      this.props.deletePlaylist(id, user)
+    }
+  }
+
   //========================================= RENDERING
 
   renderTracks(tracks) {
+    console.log("///////", tracks);
     return tracks.map((el, i) => {
       return <Track key={i}
         img={el.image}
@@ -149,15 +174,19 @@ class Playlist extends Component {
   }
 
   renderButtons = (state) => {
-    console.log('===========', state);
+    const targetPlaylist = state.playlists.filter(p => {
+      if (p.id === this.state.playlistId) return p
+    })
+    console.log('TAAAAAARGET PLAYSLIST', targetPlaylist)
     let buttonClass;
-    if (JSON.parse(window.localStorage.getItem('user')) === null) {
+    if (this.props.user === null) {
       buttonClass = 'Collabed';
     } else {
-      buttonClass = state.selectedPlaylist.collabers.indexOf(JSON.parse(window.localStorage.getItem('user')).name) >= 0
+      buttonClass = targetPlaylist[0].collabers.indexOf(this.state.user) >= 0
         ? 'Collabed'
         : '';
     }
+    console.log('one moreee', state);
     if (state.isAdmin) {
       const text = state.loading ? (<img alt="LOADING" className="ButtonLoad" src={require('../assets/circle.png')}/>) : 'GENERATE';
       const color = state.loading ? 'Generate Clicked' : 'Generate';
@@ -167,7 +196,7 @@ class Playlist extends Component {
         </div>
       ) : (
         <div className="PlaylistManage">
-          <button className="Create Delete" onClick={this.delete}><img className="DeleteIco"alt="DELETE" src={require('../assets/delete.png')}/></button>
+          <button className="Create Delete" onClick={() => this.handleDelete(targetPlaylist[0].id, state)}><img className="DeleteIco"alt="DELETE" src={require('../assets/delete.png')}/></button>
           <button className={color} onClick={this.generate}>{text}</button>
         </div>
       )
@@ -177,12 +206,15 @@ class Playlist extends Component {
       return state.done ? (
         <button className={color} onClick={this.copy}>{text}</button>
       ) : (
-        <button className={'Collaborate ' + buttonClass} onClick={this.collaborate}>COLLABORATE</button>
+        <button className={'Collaborate ' + buttonClass} onClick={() => this.props.collaborate(this.state.playlistId, state)}>COLLABORATE</button>
       );
     }
   }
 
   renderContent = (state) => {
+    const targetPlaylist = state.playlists.filter(p => {
+      if (p.id === this.state.playlistId) return p
+    })
     if (state) {
       if (state.deleted) {
         return (
@@ -193,17 +225,19 @@ class Playlist extends Component {
           </div>
         )
       } else {
+        console.log("state", state);
         const buttons = this.renderButtons(state);
-        const tracks = this.renderTracks(state.tracks);
+        const tracks = this.renderTracks(targetPlaylist[0].tracks);
         const name = state.name;
-        const admin = state.admin ? state.admin.split(' ')[0] : 'N/A';
-        const collabers = (state.collabers.filter(el => el !== admin).length > 0)
-        ? ` with the help of ${state.collabers
+        const admin = targetPlaylist[0].admin ? targetPlaylist[0].admin.split(' ')[0] : 'N/A';
+        console.log(admin, 'ADMIIIIIIIN')
+        const collabers = (targetPlaylist[0].collabers.filter(el => el !== admin).length > 0)
+        ? ` with the help of ${targetPlaylist[0].collabers
           .map(el => el !== null ? el.split(' ')[0] : null)
           .filter(el => (el !== null && el !== admin) ? true : false)
           .join(', ')}`
         : ' and in need of collaborators';
-        const extra = (state.tracks.length === 0)
+        const extra = (targetPlaylist[0].tracks.length === 0)
         ? (<p className="MoreSongs">this playlist needs a little help. Come on, click that button!</p>)
         : (<p className="MoreSongs">{`... making that ${this.state.length} songs in total`}</p>);
         return (
@@ -228,7 +262,7 @@ class Playlist extends Component {
   }
 
   render() {
-    if (this.props.user.selectedPlaylist.loaded) {
+    if (this.props.user.loaded) {
       const content = this.renderContent(this.props.user);
       return (
         <div className="Wrapper">
@@ -253,7 +287,9 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch) => ({
   unset: (playlist) => dispatch(unset(playlist)),
-  getPlaylist: (id, user) => dispatch(getPlaylist(id, user))
+  getPlaylist: (id, user) => dispatch(getPlaylist(id, user)),
+  collaborate: (id, user) => dispatch(collaborate(id, user)),
+  deletePlaylist: (id, user) => dispatch(deletePlaylist(id, user))
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Playlist);

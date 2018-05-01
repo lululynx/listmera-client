@@ -3,21 +3,29 @@ export const API = Symbol('API');
 
 export const api = store => next => action => {
   if (action[API]) {
-    const { url, method, body, mode, headers } = action[API];
-    console.log('==========', action.user);
+    const { url, method, body, mode, header } = action[API];
     fetch(config.baseServerUrl + url, {
       method: method || 'GET',
       body: JSON.stringify(body),
-      headers,
+      header,
       mode,
     })
-    .then(response => response.json())
-    .then(data => store.dispatch({
+    .then(response => {
+      const contentType = response.headers.get('Content-Type')
+      if (contentType && contentType.indexOf('application/json') !== -1) {
+        console.log('I TRY', response)
+        return response.json()
+      }})
+
+    .then(data => {
+      console.log(',,,,,,,,,,,,,,,,,', action);
+      store.dispatch({
       type: action.type + '_SUCCESS',
       data,
       user: action.user
-    }))
+    })})
     .catch(error => {
+      console.log('I FAIL');
       store.dispatch({
         type: action.type + '_FAILURE',
         error
@@ -28,7 +36,6 @@ export const api = store => next => action => {
       type: action.type + '_REQUEST'
     });
   } else {
-    console.log(action);
     next(action);
   }
 }

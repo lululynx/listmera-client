@@ -3,7 +3,7 @@ import config from '../config';
 import '../App.css';
 
 import { connect } from 'react-redux';
-import { logout } from '../actions'
+import { logout, getProfile } from '../actions'
 
 import Header from '../components/Header';
 import Loader from '../components/Loader';
@@ -78,6 +78,7 @@ class Profile extends Component {
 
 const mapDispatchToProps = (dispatch) => ({
   logout: () => dispatch(logout()),
+  getProfile: (user) => dispatch(getProfile(user))
 })
 
 export default connect(null, mapDispatchToProps)(Profile);

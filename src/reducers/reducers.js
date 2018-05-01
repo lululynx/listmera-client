@@ -7,7 +7,6 @@ const user = {
   error: null,
   isAdmin: false,
   loaded: false,
-  selectedPlaylist: {}
 }
 
 const reducer = (state = user, action) => {
@@ -102,7 +101,6 @@ const reducer = (state = user, action) => {
   return {
     ...state,
     fetching: false,
-    selectedPlaylist: action.data,
     isAdmin: action.data.admin === action.user,
     loaded: true
   }
@@ -126,6 +124,53 @@ const reducer = (state = user, action) => {
     fetching: false,
     loaded: true
   }
+
+  case 'DELETE_PLAYLIST_REQUEST':
+  return {
+    ...state,
+    fetching: true
+  }
+
+  case 'DELETE_PLAYLIST_FAILURE':
+  return {
+    ...state,
+    fetching: false,
+    error: action.payload
+  }
+
+  case 'DELETE_PLAYLIST_SUCCESS':
+  return {
+    ...state,
+    user: {
+      ...state.user,
+      playlists: state.user.playlists.filter(item => item !== action.payload)
+    },
+    fetching: false,
+  }
+
+  case 'GET_PROFILE_REQUEST':
+  return {
+    ...state,
+    fetching: true,
+  }
+
+  case 'GET_PROFILE_FAILURE':
+  return {
+    ...state,
+    fetching: false,
+    loaded: false
+  }
+
+  case 'GET_PROFILE_REQUEST':
+  return {
+    ...state,
+    fetching: false,
+    loaded: true
+  }
+
+
+
+
 
   default: return state;
   }
