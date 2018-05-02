@@ -41,7 +41,7 @@ export const getRecent = () => ({
   type:'GET_RECENT',
   [API]: {
     url: '/api/playlists/recent',
-    header: {
+    headers: {
       'Origin': config.baseClientUrl
     }
   }
@@ -52,7 +52,7 @@ export const getPlaylist = (url, user) => ({
   user,
   [API]: {
     url: '/api' + url,
-    header: {
+    headers: {
       'Origin': config.baseClientUrl
     }
   }
@@ -89,13 +89,31 @@ export const deletePlaylist = (url, user) => ({
   }
 })
 
-export const getProfile = (user) => ({
-  type: 'GET_PROFILE',
+export const getProfile = (user) => {
+  const headers = new Headers({
+    User: user.username,
+    Origin: config.baseClientUrl,
+  });
+  return {
+    type: 'GET_PROFILE',
+    [API]: {
+      url: '/api/me',
+      headers,
+    }
+  }
+}
+
+export const postLogin = (code) => ({
+  type: 'POST_LOGIN',
   [API]: {
-    url: '/api/me',
-    header: {
+    url: '/api/register',
+    method: 'POST',
+    body: code,
+    mode: 'cors',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
       'Origin': config.baseClientUrl,
-      'User': user.username
     }
   }
 })

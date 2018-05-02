@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import config from '../config';
 import '../App.css';
 
 import { connect } from 'react-redux';
@@ -16,21 +15,7 @@ class Profile extends Component {
     if (!user) {
       window.location = '/access';
     } else {
-      const headers = new Headers({
-        User: user.username,
-        Origin: config.baseClientUrl,
-      })
-      fetch(`${config.baseServerUrl}/api/me`, {
-        method: 'GET',
-        headers: headers
-      }).then(res => res.json())
-        .then(res => {
-          this.setState({
-            ...res,
-            loaded: true,
-          });
-        })
-        .catch(e => console.error(e));
+      props.getProfile(user)
     }
   }
 
@@ -48,16 +33,16 @@ class Profile extends Component {
         <div className="MaxWidthCreate">
           <div className="ProfileWrapper">
             <div className="ProfileImage">
-              <img alt="you" className="WelcomePicture" src={this.state.picture}/>
+              <img alt="you" className="WelcomePicture" src={state.picture}/>
             </div>
             <div className="ProfileDetails">
-              <h3>Name: {this.state.name}</h3>
-              <h3>e-mail: {this.state.email}</h3>
-              <h3>Username: {this.state.username}</h3>
+              <h3>Name: {state.name}</h3>
+              <h3>e-mail: {state.email}</h3>
+              <h3>Username: {state.username}</h3>
               <a onClick={this.logout}><p>log out</p></a>
             </div>
           </div>
-          <TopLists content={this.state.adminOf} title="Your Playlists"/>
+          <TopLists content={state.adminOf} title="Your Playlists"/>
         </div>
       )
     } else {
@@ -66,7 +51,7 @@ class Profile extends Component {
   }
 
   render() {
-    const profile = this.renderProfile(this.state);
+    const profile = this.renderProfile(this.props.user);
     return (
       <div className="Wrapper">
         <Header />
@@ -75,10 +60,13 @@ class Profile extends Component {
     );
   }
 }
+const mapStateToProps = (state) => ({
+  user: state
+})
 
 const mapDispatchToProps = (dispatch) => ({
   logout: () => dispatch(logout()),
   getProfile: (user) => dispatch(getProfile(user))
 })
 
-export default connect(null, mapDispatchToProps)(Profile);
+export default connect(mapStateToProps, mapDispatchToProps)(Profile);

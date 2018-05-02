@@ -3,16 +3,16 @@ export const API = Symbol('API');
 
 export const api = store => next => action => {
   if (action[API]) {
-    const { url, method, body, mode, header } = action[API];
+    const { url, method, body, mode, headers } = action[API];
     fetch(config.baseServerUrl + url, {
       method: method || 'GET',
       body: JSON.stringify(body),
-      header,
+      headers,
       mode,
     })
     .then(response => {
       const contentType = response.headers.get('Content-Type')
-      if (contentType && contentType.indexOf('application/json') !== -1) {
+      if (contentType && contentType.indexOf('application/json; charset=utf-8') !== -1) {
         return response.json()
       } else {
         return null;
@@ -25,7 +25,6 @@ export const api = store => next => action => {
       user: action.user
     })})
     .catch(error => {
-      console.log('I FAIL');
       store.dispatch({
         type: action.type + '_FAILURE',
         error

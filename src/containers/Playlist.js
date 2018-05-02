@@ -17,70 +17,8 @@ class Playlist extends Component {
     this.state = {
       playlistId: window.location.pathname.split('/')[2],
       user: JSON.parse(window.localStorage.getItem('user')).username || props.user.username,
-      // targetPlaylist: props.playlists.filter(p => {
-      //   if (p.id === this.playlistId) return p
-      // })
-
     }
   }
-
-
-
-
-
-  //   fetch(`${config.baseServerUrl}/api${window.location.pathname}`, {
-  //     'Origin': config.baseClientUrl,
-  //   })
-  //     .then(res => {
-  //       if (res.status === 404) return false;
-  //       return res.json()
-  //     })
-  //     .then(res => {
-  //       if (!res) this.setState({deleted: true});
-  //       if (window.localStorage.getItem('user') && JSON.parse(window.localStorage.getItem('user')).username === res.adminId) {
-  //         this.setState({
-  //           ...res,
-  //           isAdmin: true,
-  //           loaded: true,
-  //         });
-  //       } else {
-  //         this.setState({
-  //           ...res,
-  //           loaded: true,
-  //         });
-  //       }
-  //     })
-  //     .catch(e => {
-  //       console.error(e);
-  //     });
-  // }
-
-
-  // componentDidMount() {
-  //
-  //
-  //
-  // static getDerivedStateFromProps (nextProps, prevState) {
-  //   return {
-  //     ...nextProps,
-  //   }
-  // }
-
-  // collaborate () {
-  //   // fetch(`${config.baseServerUrl}/api${window.location.pathname}`, {
-  //   //   method: 'PUT',
-  //   //   body: window.localStorage.getItem('user'),
-  //   //   mode: 'cors',
-  //   //   header: {
-  //   //     'Accept': 'application/json',
-  //   //     'Content-Type': 'application/json',
-  //   //     'Origin': config.baseClientUrl,
-  //   //   },
-  //   // }).then(res => {
-  //   //   if (res.status === 200) window.location.reload();
-  //   // })
-  //   //   .catch(e => console.error(e));
-  // }
 
   generate = () => {
     this.setState({
@@ -122,47 +60,17 @@ class Playlist extends Component {
       .catch(e => console.error(e));
   }
 
-  // delete = () => {
-  //   let user = JSON.parse(window.localStorage.getItem('user'));
-  //   const sure = window.confirm(`Hey ${user.name.split(' ')[0]}, are you sure you want to delete this playlist?`);
-  //   if (sure) {
-  //     const body = {username: user.username};
-  //     fetch(`${config.baseServerUrl}/api${window.location.pathname}`, {
-  //       method: 'DELETE',
-  //       body: JSON.stringify(body),
-  //       mode: 'cors',
-  //       headers: {
-  //         'Accept': 'application/json',
-  //         'Content-Type': 'application/json',
-  //         'Origin': config.baseClientUrl,
-  //       },
-  //     }).then(res => {
-  //       const track = window.location.pathname.split('/')[2];
-  //       const newPlaylists = user.playlists.filter(el => el !== track)
-  //       user = {
-  //         ...user,
-  //         playlists: newPlaylists,
-  //       }
-  //       window.localStorage.setItem('user', JSON.stringify(user));
-  //       this.props.unset(track)
-  //       window.location = '/';
-  //     })
-  //       .catch(e => console.error(e));
-  //   }
-  // }
-
   handleDelete = (id, user) => {
-    console.log(user, 'AAAAAAAHHHHHHH')
     const sure = window.confirm(`Hey ${user.name.split(' ')[0]}, are you sure you want to delete this playlist?`);
     if (sure) {
       this.props.deletePlaylist(id, user)
+      window.location = '/';
     }
   }
 
   //========================================= RENDERING
 
   renderTracks(tracks) {
-    console.log("///////", tracks);
     return tracks.map((el, i) => {
       return <Track key={i}
         img={el.image}
@@ -175,18 +83,20 @@ class Playlist extends Component {
 
   renderButtons = (state) => {
     const targetPlaylist = state.playlists.filter(p => {
-      if (p.id === this.state.playlistId) return p
+      if ((p !== null) && p.id === this.state.playlistId) return p
     })
-    console.log('TAAAAAARGET PLAYSLIST', targetPlaylist)
     let buttonClass;
     if (this.props.user === null) {
       buttonClass = 'Collabed';
     } else {
-      buttonClass = targetPlaylist[0].collabers.indexOf(this.state.user) >= 0
-        ? 'Collabed'
-        : '';
+      if (targetPlaylist[0]) {
+        buttonClass = targetPlaylist[0].collabers.indexOf(this.state.user) >= 0
+          ? 'Collabed'
+          : '';
+      } else {
+        buttonClass = ''
+      }
     }
-    console.log('one moreee', state);
     if (state.isAdmin) {
       const text = state.loading ? (<img alt="LOADING" className="ButtonLoad" src={require('../assets/circle.png')}/>) : 'GENERATE';
       const color = state.loading ? 'Generate Clicked' : 'Generate';
@@ -212,10 +122,8 @@ class Playlist extends Component {
   }
 
   renderContent = (state) => {
-    console.log('another', state);
-    
     const targetPlaylist = state.playlists.filter(p => {
-      if (p.id === this.state.playlistId) return p
+      if ((p !== null) && p.id === this.state.playlistId) return p
     })
     if (state) {
       if (state.deleted) {

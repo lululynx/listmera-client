@@ -24,7 +24,7 @@ class Create extends Component {
   static getDerivedStateFromProps (nextProps, prevState) {
     if (nextProps.user && prevState.lengthPlaylistIds !== nextProps.user.playlists.length) {
       window.localStorage.setItem('user', JSON.stringify(nextProps.user));
-      window.location = `/playlist/${nextProps.user.playlists[nextProps.user.playlists.length - 1]}`;
+      window.location = `/playlist/${nextProps.user.playlists[nextProps.user.playlists.length - 1].id}`;
     }
     return {
       ...prevState,
@@ -52,6 +52,10 @@ class Create extends Component {
     }
   }
 
+  handlePlaylist = (username, value, state, tempo) => {
+    this.props.createPlaylist(username, value, state, tempo)
+  }
+
   //========================================= RENDERING
 
   toggleClass(name) {
@@ -60,7 +64,6 @@ class Create extends Component {
   }
 
   render() {
-    console.log(this.state, '===========================SCREWIT=====')
     return (
       <div className="Wrapper"> {this.state.flag ? 'true' : 'false'}
         <Header />
@@ -125,9 +128,7 @@ class Create extends Component {
             </div>
           </div>
           <button className="Create"
-          onClick ={() => {
-            this.props.createPlaylist(this.props.user.username, this.inputName.value, this.state.selected, this.tempo.value)}
-          }> CREATE </button>
+          onClick ={() => {this.props.createPlaylist(this.props.user.username, this.inputName.value, this.state.selected, this.tempo.value)}}> CREATE </button>
         </div>
       </div>
     );
@@ -141,7 +142,7 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch) => ({
   set: (playlist) => dispatch(set(playlist)),
-  createPlaylist: (userName, listName, selectedValues, selectedTempo) => dispatch(createPlaylist(userName, listName, selectedValues, selectedTempo))
+  createPlaylist: (userName, listName, selectedValues, selectedTempo) => dispatch(createPlaylist(userName, listName, selectedValues, selectedTempo)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Create);

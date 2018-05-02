@@ -7,6 +7,7 @@ const user = {
   error: null,
   isAdmin: false,
   loaded: false,
+  userProfile: {},
 }
 
 const reducer = (state = user, action) => {
@@ -58,7 +59,7 @@ const reducer = (state = user, action) => {
     fetching: false,
     playlists: [
       ...state.playlists,
-      action.data.id,
+      action.data.content,
     ]
   }
 
@@ -162,13 +163,33 @@ const reducer = (state = user, action) => {
   case 'GET_PROFILE_SUCCESS':
   return {
     ...state,
+    profile: action.data,
     fetching: false,
     loaded: true
   }
 
+  case 'POST_LOGIN_REQUEST':
+  return {
+    ...state,
+    fetching: true
+  }
 
+  case 'POST_LOGIN_FAILURE':
+  return {
+    ...state,
+    fetching: false,
+    error: action.payload
+  }
 
-
+  case 'POST_LOGIN_SUCCESS':
+  return {
+    ...state,
+      username: action.data.name,
+      name: action.data.name,
+      picture: action.data.picture ? action.data.picture : require('../assets/music-player.png'),
+      loaded: true,
+    fetching: true
+  }
 
   default: return state;
   }

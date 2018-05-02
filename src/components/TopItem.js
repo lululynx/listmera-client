@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import '../App.css';
-
+import { connect } from 'react-redux';
 class TopItem extends Component {
 
   //========================================= RENDERING
@@ -42,4 +42,8 @@ class TopItem extends Component {
   }
 }
 
-export default TopItem;
+const mapStateToProps = (state) => ({
+  user: state
+})
+
+export default connect(mapStateToProps)(TopItem);
