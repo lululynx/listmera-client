@@ -158,7 +158,7 @@ class Playlist extends Component {
     } else {
       return (
         <div className="Wrapper">
-          <Header />
+          <Header />*
           <Loader />
         </div>
       );
