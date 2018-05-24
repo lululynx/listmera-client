@@ -3,7 +3,15 @@ import config from '../config';
 import '../App.css';
 
 import { connect } from 'react-redux';
-import { unset, getPlaylist, collaborate, deletePlaylist, getRecent } from '../actions'
+
+import {
+  unset,
+  getPlaylist,
+  collaborate,
+  deletePlaylist,
+  getRecent,
+  generatePlaylist
+} from '../actions'
 
 import Header from '../components/Header';
 import Loader from '../components/Loader';
@@ -17,47 +25,8 @@ class Playlist extends Component {
     this.state = {
       playlistId: window.location.pathname.split('/')[2],
       user: JSON.parse(window.localStorage.getItem('user')).username || props.user.username,
+      done: false
     }
-  }
-
-  generate = () => {
-    this.setState({
-      ...this.state,
-      loading: true,
-    });
-    fetch(`${config.baseServerUrl}/api${window.location.pathname}`, {
-      method: 'POST',
-      body: window.localStorage.getItem('user'),
-      mode: 'cors',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Origin': config.baseClientUrl,
-      },
-    }).then(res => window.location = '/generated')
-      .catch(e => console.error(e));
-  }
-
-  copy = () => {
-    this.setState({
-      ...this.state,
-      loading: true,
-    });
-    const body = {
-      ...JSON.parse(window.localStorage.getItem('user')),
-      copy: true,
-    }
-    fetch(`${config.baseServerUrl}/api${window.location.pathname}`, {
-      method: 'POST',
-      body: JSON.stringify(body),
-      mode: 'cors',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Origin': config.baseClientUrl,
-      },
-    }).then(res => window.location = '/generated')
-      .catch(e => console.error(e));
   }
 
   handleDelete = (id, user) => {
@@ -66,6 +35,14 @@ class Playlist extends Component {
       this.props.deletePlaylist(id, user)
       window.location = '/';
     }
+  }
+
+  handleGenerate = (id, user) => {
+    this.props.generatePlaylist(id, user)
+    this.setState({
+      ...this.state,
+      done: true})
+    window.location = '/generated'
   }
 
   //========================================= RENDERING
@@ -100,20 +77,20 @@ class Playlist extends Component {
     if (state.isAdmin) {
       const text = state.loading ? (<img alt="LOADING" className="ButtonLoad" src={require('../assets/circle.png')}/>) : 'GENERATE';
       const color = state.loading ? 'Generate Clicked' : 'Generate';
-      return state.done ? (
+      return this.props.user.done ? (
         <div className="PlaylistManage">
           <button className="Generate Clicked InactiveButton">DONE</button>
         </div>
       ) : (
         <div className="PlaylistManage">
           <button className="Create Delete" onClick={() => this.handleDelete(targetPlaylist[0].id, state)}><img className="DeleteIco"alt="DELETE" src={require('../assets/delete.png')}/></button>
-          <button className={color} onClick={this.generate}>{text}</button>
+          <button className={color} onClick={() => this.handleGenerate(this.state.playlistId, state)}>{text}</button>
         </div>
       )
     } else {
       const text = state.loading ? (<img alt="LOADING" className="ButtonLoad" src={require('../assets/circle.png')}/>) : 'COPY';
       const color = state.loading ? 'Generate Clicked' : 'Generate';
-      return state.done ? (
+      return this.props.user.done ? (
         <button className={color} onClick={this.copy}>{text}</button>
       ) : (
         <button className={'Collaborate ' + buttonClass} onClick={() => this.props.collaborate(this.state.playlistId, state)}>COLLABORATE</button>
@@ -137,7 +114,7 @@ class Playlist extends Component {
       } else {
         const buttons = this.renderButtons(state);
         const tracks = this.renderTracks(targetPlaylist[0].tracks);
-        const name = state.name;
+        const name = state.playlists.filter(name => name.id === this.state.playlistId)[0].name
         const admin = targetPlaylist[0].admin ? targetPlaylist[0].admin.split(' ')[0] : 'N/A';
         const collabers = (targetPlaylist[0].collabers.filter(el => el !== admin).length > 0)
         ? ` with the help of ${targetPlaylist[0].collabers
@@ -198,7 +175,8 @@ const mapDispatchToProps = (dispatch) => ({
   getPlaylist: (id, user) => dispatch(getPlaylist(id, user)),
   collaborate: (id, user) => dispatch(collaborate(id, user)),
   deletePlaylist: (id, user) => dispatch(deletePlaylist(id, user)),
-  getRecent: () => dispatch(getRecent())
+  getRecent: () => dispatch(getRecent()),
+  generatePlaylist: (id, user) => dispatch(generatePlaylist(id, user))
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Playlist);

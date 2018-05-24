@@ -73,6 +73,26 @@ export const collaborate = (url, user) => ({
   }
 })
 
+
+export const generatePlaylist = (url, user) => {
+  console.log('>>>>>URL', url);
+  console.log('>>>>>USER', user);
+  return {
+    type: 'GENERATE',
+    [API]: {
+      url: '/api/playlist/' + url,
+      method: 'POST',
+      body: user,
+      mode: 'cors',
+      header: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Origin': config.baseClientUrl,
+      },
+    }
+  }
+}
+
 export const deletePlaylist = (url, user) => ({
   type: 'DELETE_PLAYLIST',
   user,
